@@ -12,10 +12,26 @@ if (!in_array($jabatan, ['Pimpinan', 'Kepala LKSA', 'Pegawai'])) {
 // PERUBAHAN: Hanya Pimpinan Pusat yang dapat melihat semua (Global View)
 $sql = "SELECT d.*, u.Nama_User FROM Donatur d JOIN User u ON d.ID_user = u.Id_user WHERE d.Status_Data = 'Active'";
 
+$params = [];
+$types = "";
+
 if ($jabatan != 'Pimpinan' || $id_lksa != 'Pimpinan_Pusat') {
-    $sql .= " AND d.ID_LKSA = '$id_lksa'"; // Filter untuk Kepala LKSA, Pegawai, dan Pimpinan Cabang
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " AND d.ID_LKSA = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
-$result = $conn->query($sql);
+
+// Eksekusi Kueri
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 
 // Set sidebar stats ke string kosong agar sidebar tetap tampil
 $sidebar_stats = '';

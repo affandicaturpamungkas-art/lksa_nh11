@@ -12,10 +12,27 @@ $id_lksa = $_SESSION['id_lksa'];
 
 // Gabungkan (JOIN) tabel Sumbangan dengan tabel Donatur untuk mendapatkan Nama Donatur
 $sql = "SELECT s.*, d.Nama_Donatur FROM Sumbangan s LEFT JOIN Donatur d ON s.ID_donatur = d.ID_donatur";
+
+$params = [];
+$types = "";
+
 if ($_SESSION['jabatan'] != 'Pimpinan') {
-    $sql .= " WHERE s.ID_LKSA = '$id_lksa'";
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " WHERE s.ID_LKSA = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
-$result = $conn->query($sql);
+
+// Eksekusi Kueri
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 ?>
 <style>
     /* Tambahan style sederhana untuk tombol ikon */

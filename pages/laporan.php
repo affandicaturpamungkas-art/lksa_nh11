@@ -16,15 +16,29 @@ $id_lksa = $_SESSION['id_lksa'];
 // Kueri SQL untuk mengambil laporan (dengan Pelapor_Type)
 $sql = "SELECT * FROM Laporan l";
 
+$params = [];
+$types = "";
+
 // Filter laporan berdasarkan LKSA jika bukan Pimpinan Pusat
 if ($jabatan_user == 'Kepala LKSA' || ($jabatan_user == 'Pimpinan' && $id_lksa != 'Pimpinan_Pusat')) {
-    $sql .= " WHERE l.ID_LKSA = '$id_lksa'";
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " WHERE l.ID_LKSA = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
 
 $sql .= " ORDER BY l.Tgl_Lapor DESC";
 
-$result = $conn->query($sql);
+// Eksekusi Kueri Utama
+$stmt_laporan = $conn->prepare($sql);
 
+if (!empty($params)) {
+    $stmt_laporan->bind_param($types, ...$params);
+}
+
+$stmt_laporan->execute();
+$result = $stmt_laporan->get_result();
+$stmt_laporan->close();
 ?>
 <h1 class="dashboard-title"><i class="fas fa-inbox"></i> Kotak Masuk Laporan</h1>
 <p>Daftar pesan dan laporan yang dikirimkan oleh pengguna sistem (Internal, Donatur, Pemilik Kotak Amal).</p>
@@ -60,6 +74,7 @@ $result = $conn->query($sql);
                 $table_name = 'Tidak Diketahui';
             }
 
+            // Kueri Nama Pelapor (sudah menggunakan prepared statement sebelumnya, ini dipertahankan)
             if (isset($name_sql)) {
                 $name_stmt = $conn->prepare($name_sql);
                 $name_stmt->bind_param("s", $id_pelapor);

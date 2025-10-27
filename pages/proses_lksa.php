@@ -8,7 +8,9 @@ if ($_SESSION['jabatan'] != 'Pimpinan' || $_SESSION['id_lksa'] != 'Pimpinan_Pusa
 
 // Fungsi untuk mengunggah file logo (MENGGUNAKAN LOGIKA NAMA BARU)
 function handle_upload($file, $nama_lksa) {
-    $target_dir = "C:/xampp/htdocs/lksa_nh/assets/img/";
+    // --- PERBAIKAN: Mengganti hardcode path dengan path relatif yang dinamis ---
+    $target_dir = __DIR__ . '/../assets/img/';
+    
     $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
     $allowed_extensions = array("jpg", "jpeg", "png", "gif");
 
@@ -92,8 +94,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $final_logo_path = $upload_result['filename'];
 
             // Hapus logo lama jika ada
-            if ($logo_lama && file_exists("C:/xampp/htdocs/lksa_nh/assets/img/" . $logo_lama)) {
-                unlink("C:/xampp/htdocs/lksa_nh/assets/img/" . $logo_lama);
+            // --- PERBAIKAN: Mengganti hardcode path dengan path relatif ---
+            if ($logo_lama) {
+                 $file_path_lama = __DIR__ . "/../assets/img/" . $logo_lama;
+                if (file_exists($file_path_lama)) {
+                    unlink($file_path_lama);
+                }
             }
         }
         

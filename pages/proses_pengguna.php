@@ -8,7 +8,9 @@ if ($_SESSION['jabatan'] != 'Pimpinan' && $_SESSION['jabatan'] != 'Kepala LKSA')
 
 // Fungsi untuk mengunggah foto (MENGGUNAKAN LOGIKA NAMA BARU)
 function handle_upload($file, $jabatan, $nama_user) {
-    $target_dir = "C:/xampp/htdocs/lksa_nh/assets/img/";
+    // --- PERBAIKAN: Mengganti hardcode path dengan path relatif yang dinamis ---
+    $target_dir = __DIR__ . '/../assets/img/';
+    
     $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
     $allowed_extensions = array("jpg", "jpeg", "png", "gif");
 
@@ -102,10 +104,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id_user = generate_user_id($conn, $jabatan, $id_lksa);
         $status_active = 'Active'; // Tambahkan status default
 
+        // --- PERBAIKAN KRITIS: HASH PASSWORD SEBELUM DISIMPAN ---
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
         // PERUBAHAN: Menambahkan kolom Status
         $sql = "INSERT INTO User (Id_user, Nama_User, Password, Jabatan, Id_lksa, Foto, Status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssssss", $id_user, $nama_user, $password, $jabatan, $id_lksa, $foto_path, $status_active);
+        // Menggunakan $hashed_password (hash aman) saat binding
+        $stmt->bind_param("sssssss", $id_user, $nama_user, $hashed_password, $jabatan, $id_lksa, $foto_path, $status_active);
         
         if ($stmt->execute()) {
             
@@ -127,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif ($action == 'edit') {
         $id_user = $_POST['id_user'] ?? '';
         $foto_lama = $_POST['foto_lama'] ?? '';
-        // Tidak perlu mengubah kolom Status di sini, karena status hanya diubah oleh proses arsip/restore
+        
         $sql = "UPDATE User SET Nama_User = ?, Jabatan = ?, Id_lksa = ?, Foto = ? WHERE Id_user = ?";
         
         $final_foto_path = $foto_path ?: $foto_lama;
@@ -137,8 +143,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             // Hapus foto lama hanya jika foto baru berhasil diunggah
-            if ($foto_path && $foto_lama && file_exists("C:/xampp/htdocs/lksa_nh/assets/img/" . $foto_lama)) {
-                unlink("C:/xampp/htdocs/lksa_nh/assets/img/" . $foto_lama);
+            // --- PERBAIKAN: Mengganti hardcode path dengan path relatif ---
+            if ($foto_path && $foto_lama) {
+                $file_path_lama = __DIR__ . "/../assets/img/" . $foto_lama;
+                if (file_exists($file_path_lama)) {
+                    unlink($file_path_lama);
+                }
             }
             
             // Perluasan logika edit: Jika jabatan diubah menjadi Pimpinan/Kepala LKSA, update nama di tabel LKSA

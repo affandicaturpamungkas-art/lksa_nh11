@@ -11,23 +11,46 @@ if ($_SESSION['jabatan'] != 'Pimpinan' && $_SESSION['jabatan'] != 'Kepala LKSA' 
 $id_user = $_SESSION['id_user'];
 $id_lksa = $_SESSION['id_lksa'];
 
-// Ambil daftar kotak amal untuk dropdown
+// --- 1. Ambil daftar kotak amal untuk dropdown (Kueri 1)
 $sql_kotak_amal = "SELECT ID_KotakAmal, Nama_Toko FROM KotakAmal";
 if ($_SESSION['jabatan'] != 'Pimpinan') {
-    $sql_kotak_amal .= " WHERE Id_lksa = '$id_lksa'";
+    // Gunakan Prepared Statement untuk filter Id_lksa
+    $sql_kotak_amal .= " WHERE Id_lksa = ?"; 
+    $stmt_ka = $conn->prepare($sql_kotak_amal);
+    $stmt_ka->bind_param("s", $id_lksa);
+    $stmt_ka->execute();
+    $result_kotak_amal = $stmt_ka->get_result();
+    $stmt_ka->close();
+} else {
+    $result_kotak_amal = $conn->query($sql_kotak_amal);
 }
-$result_kotak_amal = $conn->query($sql_kotak_amal);
 
-// Ambil riwayat pengambilan dana
+// --- 2. Ambil riwayat pengambilan dana (Kueri 2)
 $sql_history = "SELECT dka.*, ka.Nama_Toko, u.Nama_User
                 FROM Dana_KotakAmal dka
                 LEFT JOIN KotakAmal ka ON dka.ID_KotakAmal = ka.ID_KotakAmal
                 LEFT JOIN User u ON dka.Id_user = u.Id_user";
+                
+$params = [];
+$types = "";
+                
 if ($_SESSION['jabatan'] != 'Pimpinan') {
-    $sql_history .= " WHERE dka.Id_lksa = '$id_lksa'";
+    // Gunakan Prepared Statement untuk filter Id_lksa
+    $sql_history .= " WHERE dka.Id_lksa = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
-$sql_history .= " ORDER BY dka.Tgl_Ambil DESC"; // Tambahkan order by agar data terbaru di atas
-$result_history = $conn->query($sql_history);
+$sql_history .= " ORDER BY dka.Tgl_Ambil DESC";
+
+// Eksekusi Kueri 2
+$stmt_history = $conn->prepare($sql_history);
+
+if (!empty($params)) {
+    $stmt_history->bind_param($types, ...$params);
+}
+
+$stmt_history->execute();
+$result_history = $stmt_history->get_result();
 
 ?>
 <style>
@@ -56,15 +79,15 @@ $result_history = $conn->query($sql_history);
                 <select name="id_kotak_amal" required>
                     <option value="">-- Pilih Kotak Amal --</option>
                     <?php 
-                    // Reset pointer result_kotak_amal
-                    if ($result_kotak_amal->num_rows > 0) {
+                    // Pastikan pointer result_kotak_amal diulang untuk dropdown
+                    if (isset($result_kotak_amal) && $result_kotak_amal->num_rows > 0) {
                         $result_kotak_amal->data_seek(0);
-                    }
-                    while ($row_ka = $result_kotak_amal->fetch_assoc()) { ?>
-                        <option value="<?php echo htmlspecialchars($row_ka['ID_KotakAmal']); ?>">
-                            <?php echo htmlspecialchars($row_ka['Nama_Toko']); ?>
-                        </option>
-                    <?php } ?>
+                        while ($row_ka = $result_kotak_amal->fetch_assoc()) { ?>
+                            <option value="<?php echo htmlspecialchars($row_ka['ID_KotakAmal']); ?>">
+                                <?php echo htmlspecialchars($row_ka['Nama_Toko']); ?>
+                            </option>
+                        <?php }
+                    } ?>
                 </select>
             </div>
 
@@ -111,5 +134,6 @@ $result_history = $conn->query($sql_history);
 
 <?php
 include '../includes/footer.php';
+$stmt_history->close();
 $conn->close();
 ?>

@@ -9,7 +9,9 @@ if (!isset($_SESSION['is_pemilik_kotak_amal'])) {
 
 // Fungsi untuk mengunggah file foto (MENGGUNAKAN LOGIKA NAMA BARU)
 function handle_upload($file, $nama_toko) {
-    $target_dir = "C:/xampp/htdocs/lksa_nh/assets/img/";
+    // --- PERBAIKAN: Mengganti hardcode path dengan path relatif yang dinamis ---
+    $target_dir = __DIR__ . '/../assets/img/';
+    
     $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
     $allowed_extensions = array("jpg", "jpeg", "png", "gif");
 
@@ -45,9 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Mengambil data dari form
     $id_kotak_amal = $_POST['id_kotak_amal'] ?? '';
     $nama_toko = $_POST['nama_toko'] ?? '';
-    // Alamat Toko TIDAK diambil dari POST karena READONLY di form,
-    // tapi kita ambil data lama dari DB untuk menjaga konsistensi jika dibutuhkan
-    // Namun untuk update, kita tidak perlu mengupdate kolom Alamat_Toko
     $nama_pemilik = $_POST['nama_pemilik'] ?? '';
     $wa_pemilik = $_POST['wa_pemilik'] ?? '';
     $email_pemilik = $_POST['email_pemilik'] ?? '';
@@ -68,8 +67,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $foto_path = $upload_result['filename'];
         
         // Hapus foto lama jika ada
+        // --- PERBAIKAN: Mengganti hardcode path dengan path relatif ---
         if ($foto_lama) {
-            $file_path = "C:/xampp/htdocs/lksa_nh/assets/img/" . $foto_lama;
+            $file_path = __DIR__ . "/../assets/img/" . $foto_lama;
             if (file_exists($file_path)) {
                 unlink($file_path);
             }

@@ -16,18 +16,36 @@ $id_lksa = $_SESSION['id_lksa'];
 // Persiapan query SQL dasar untuk mengambil data pengguna yang DIARSIPKAN.
 $sql = "SELECT * FROM User WHERE Status = 'Archived'";
 
+$params = [];
+$types = "";
+
 // Logika untuk menyesuaikan query berdasarkan jabatan dan ID LKSA pengguna yang sedang login.
 if ($jabatan == 'Pimpinan' && $id_lksa == 'Pimpinan_Pusat') {
     // Pimpinan Pusat dapat melihat semua pengguna yang diarsip.
 } elseif ($jabatan == 'Pimpinan' && $id_lksa !== 'Pimpinan_Pusat') {
     // Pimpinan cabang hanya dapat melihat pengguna yang diarsip di LKSA-nya.
-    $sql .= " AND Id_lksa = '$id_lksa'";
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " AND Id_lksa = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 } elseif ($jabatan == 'Kepala LKSA') {
     // Kepala LKSA hanya dapat melihat pengguna yang diarsip dengan jabatan di bawahnya di LKSA-nya.
-    $sql .= " AND Id_lksa = '$id_lksa' AND Jabatan IN ('Pegawai', 'Petugas Kotak Amal')";
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " AND Id_lksa = ? AND Jabatan IN ('Pegawai', 'Petugas Kotak Amal')";
+    $params[] = $id_lksa;
+    $types = "s";
 }
 
-$result = $conn->query($sql);
+// Eksekusi Kueri
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 ?>
 
 <style>

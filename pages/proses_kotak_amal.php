@@ -4,7 +4,9 @@ include '../config/database.php';
 
 // Fungsi untuk mengunggah file foto (MENGGUNAKAN LOGIKA NAMA BARU)
 function handle_upload($file, $nama_toko) {
-    $target_dir = "C:/xampp/htdocs/lksa_nh/assets/img/";
+    // --- PERBAIKAN: Mengganti hardcode path dengan path relatif yang dinamis ---
+    $target_dir = __DIR__ . '/../assets/img/';
+    
     $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
     $allowed_extensions = array("jpg", "jpeg", "png", "gif");
 

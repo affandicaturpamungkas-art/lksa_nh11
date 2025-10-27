@@ -16,12 +16,27 @@ $sql = "SELECT ka.*
         FROM KotakAmal ka
         WHERE ka.Status = 'Archived'";
 
+$params = [];
+$types = "";
+
 // FIX: Hanya Pimpinan Pusat yang tidak difilter
 if ($jabatan != 'Pimpinan' || $id_lksa != 'Pimpinan_Pusat') {
-    $sql .= " AND ka.Id_lksa = '$id_lksa'";
+    // Perbaikan SQLI: Menggunakan placeholder
+    $sql .= " AND ka.Id_lksa = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
 
-$result = $conn->query($sql);
+// Eksekusi Kueri
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
 ?>
 <h1 class="dashboard-title">Arsip Kotak Amal</h1>
 <p>Daftar kotak amal yang telah diarsipkan (soft delete). Anda dapat memulihkan atau menghapus permanen dari sini.</p>

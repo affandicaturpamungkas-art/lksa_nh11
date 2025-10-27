@@ -1,41 +1,63 @@
 <?php
 include 'config/database.php';
+// Memastikan helpers tersedia
+include 'config/db_helpers.php'; 
 
 // Menentukan bulan dan tahun saat ini sebagai default
 $selected_month = isset($_POST['bulan']) ? $_POST['bulan'] : date('m');
 $selected_year = isset($_POST['tahun']) ? $_POST['tahun'] : date('Y');
 
-// Query untuk total sumbangan berdasarkan bulan dan tahun yang dipilih
-$total_sumbangan_bulan_ini = $conn->query("SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE MONTH(Tgl) = '$selected_month' AND YEAR(Tgl) = '$selected_year'")->fetch_assoc()['total'];
+// --- Menggunakan fungsi helper untuk kueri sederhana dan kueri berparameter ---
 
-// Menghitung total sumbangan tahunan
-$total_sumbangan_tahun_ini = $conn->query("SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE YEAR(Tgl) = '$selected_year'")->fetch_assoc()['total'];
+// Kueri dengan 2 parameter (bulan dan tahun) - Tetap menggunakan prepared statement lokal karena 2 parameter
+$sql_bulan = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE MONTH(Tgl) = ? AND YEAR(Tgl) = ?";
+$stmt_bulan = $conn->prepare($sql_bulan);
+$stmt_bulan->bind_param("ss", $selected_month, $selected_year);
+$stmt_bulan->execute();
+$total_sumbangan_bulan_ini = $stmt_bulan->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_bulan->close();
+
+
+// Kueri dengan 1 parameter (tahun) - Tetap menggunakan prepared statement lokal
+$sql_tahun = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE YEAR(Tgl) = ?";
+$stmt_tahun = $conn->prepare($sql_tahun);
+$stmt_tahun->bind_param("s", $selected_year);
+$stmt_tahun->execute();
+$total_sumbangan_tahun_ini = $stmt_tahun->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_tahun->close();
+
 
 // Menghitung total donatur
-$total_donatur = $conn->query("SELECT COUNT(*) AS total FROM Donatur")->fetch_assoc()['total'];
+$total_donatur = fetch_simple_value($conn, "SELECT COUNT(*) AS total FROM Donatur");
 
 // Menghitung total kotak amal
-$total_kotak_amal = $conn->query("SELECT COUNT(*) AS total FROM KotakAmal")->fetch_assoc()['total'];
+$total_kotak_amal = fetch_simple_value($conn, "SELECT COUNT(*) AS total FROM KotakAmal");
 
 // Menghitung total sumbangan ZIS dari Donatur
-$total_sumbangan_donatur = $conn->query("SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan")->fetch_assoc()['total'];
+$total_sumbangan_donatur = fetch_simple_value($conn, "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan");
 
 // Menghitung total dana yang diambil dari Kotak Amal
-$total_dana_kotak_amal = $conn->query("SELECT SUM(JmlUang) AS total FROM Dana_KotakAmal")->fetch_assoc()['total'];
+$total_dana_kotak_amal = fetch_simple_value($conn, "SELECT SUM(JmlUang) AS total FROM Dana_KotakAmal");
 
 // Menghitung total sumbangan keseluruhan (Donatur + Kotak Amal)
 $total_sumbangan = $total_sumbangan_donatur + $total_dana_kotak_amal;
 
 // LOGIC BARU UNTUK SIDEBAR
 $id_user = $_SESSION['id_user'] ?? '';
-$user_info_sql = "SELECT Nama_User, Foto, Jabatan FROM User WHERE Id_user = '$id_user'";
-$user_info = $conn->query($user_info_sql)->fetch_assoc();
+$user_info_sql = "SELECT Nama_User, Foto, Jabatan FROM User WHERE Id_user = ?";
+$stmt_user_info = $conn->prepare($user_info_sql);
+$stmt_user_info->bind_param("s", $id_user);
+$stmt_user_info->execute();
+$user_info = $stmt_user_info->get_result()->fetch_assoc();
+$stmt_user_info->close();
+
 $nama_user = $user_info['Nama_User'] ?? 'Pengguna';
 $foto_user = $user_info['Foto'] ?? '';
 $base_url = "http://" . $_SERVER['HTTP_HOST'] . "/lksa_nh/"; // Definisikan $base_url
 $foto_path = $foto_user ? $base_url . 'assets/img/' . $foto_user : $base_url . 'assets/img/yayasan.png'; // Use Yayasan logo as default if none
-$sidebar_total_lksa = $conn->query("SELECT COUNT(*) AS total FROM LKSA")->fetch_assoc()['total'];
-$sidebar_total_user = $conn->query("SELECT COUNT(*) AS total FROM User")->fetch_assoc()['total'];
+
+$sidebar_total_lksa = fetch_simple_value($conn, "SELECT COUNT(*) AS total FROM LKSA");
+$sidebar_total_user = fetch_simple_value($conn, "SELECT COUNT(*) AS total FROM User");
 
 // Menetapkan variabel $sidebar_stats untuk digunakan di header.php
 // Menggunakan warna baru: #14B8A6 (Teal/Lksa) dan #1F2937 (Dark Navy/User)

@@ -1,27 +1,35 @@
 <?php
 include 'config/database.php';
+// Memastikan helpers tersedia
+include 'config/db_helpers.php';
 
 $id_user = $_SESSION['id_user'];
 $id_lksa = $_SESSION['id_lksa'];
 
-// 1. Query untuk Total Sumbangan yang di-Input oleh Pegawai saat ini (Sudah ada)
-$sql_pegawai = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE ID_user = '$id_user'";
-$total_sumbangan_pegawai = $conn->query($sql_pegawai)->fetch_assoc()['total'] ?? 0;
+// 1. Query untuk Total Sumbangan yang di-Input oleh Pegawai saat ini
+$sql_pegawai = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE ID_user = ?";
+$total_sumbangan_pegawai = fetch_single_param_value($conn, $sql_pegawai, $id_user);
 
-// 2. Query baru untuk Total Sumbangan KESELURUHAN LKSA (Sumbangan dari semua user di LKSA ini)
-$sql_lksa = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE Id_lksa = '$id_lksa'";
-$total_sumbangan_lksa = $conn->query($sql_lksa)->fetch_assoc()['total'] ?? 0;
+// 2. Query baru untuk Total Sumbangan KESELURUHAN LKSA
+$sql_lksa = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE Id_lksa = ?";
+$total_sumbangan_lksa = fetch_single_param_value($conn, $sql_lksa, $id_lksa);
 
 // LOGIC BARU UNTUK SIDEBAR
-$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = '$id_user'";
-$user_info = $conn->query($user_info_sql)->fetch_assoc();
+$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = ?";
+$stmt_user_info = $conn->prepare($user_info_sql);
+$stmt_user_info->bind_param("s", $id_user);
+$stmt_user_info->execute();
+$user_info = $stmt_user_info->get_result()->fetch_assoc();
+$stmt_user_info->close();
+
 $nama_user = $user_info['Nama_User'] ?? 'Pengguna';
 $foto_user = $user_info['Foto'] ?? '';
 $base_url = "http://" . $_SERVER['HTTP_HOST'] . "/lksa_nh/"; // Definisikan $base_url
 $foto_path = $foto_user ? $base_url . 'assets/img/' . $foto_user : $base_url . 'assets/img/yayasan.png'; // Use Yayasan logo as default if none
 
 // Total donatur yang didaftarkan oleh pegawai ini
-$total_donatur_didaftarkan = $conn->query("SELECT COUNT(*) AS total FROM Donatur WHERE ID_user = '$id_user'")->fetch_assoc()['total'] ?? 0;
+$sql_donatur_didaftarkan = "SELECT COUNT(*) AS total FROM Donatur WHERE ID_user = ?";
+$total_donatur_didaftarkan = fetch_single_param_value($conn, $sql_donatur_didaftarkan, $id_user);
 
 // Menetapkan variabel $sidebar_stats untuk digunakan di header.php (Mempertahankan total input pegawai)
 $sidebar_stats = '

@@ -1,4 +1,4 @@
-/* File: assets/css/style.css */
+/* File: affandicaturpamungkas-art/lksa_nh12/lksa_nh12-00e3c0cc8050ed24b06174c0908f14aefbdc8ae9/assets/css/style.css */
 
 body {
     font-family: 'Open Sans', sans-serif; /* Diubah dari 'Lato' */
@@ -246,6 +246,10 @@ h1, h2, h3, h4, h5, h6 {
 .card-kotak-amal .value { color: #F59E0B; }
 .card-kotak-amal i { color: #F59E0B; }
 
+.card-total { border-color: #EF4444; }
+.card-total .value { color: #EF4444; }
+.card-total i { color: #EF4444; }
+
 .btn {
     padding: 12px 25px;
     border-radius: 10px;
@@ -289,4 +293,39 @@ th, td {
 
 .form-group input, .form-group select, .form-group textarea {
     border-radius: 10px;
+}
+
+/* === PERBAIKAN RESPONSIVITAS KHUSUS MOBILE === */
+@media (max-width: 600px) {
+    /* 1. Mengubah Layout Form Grid menjadi Single Column */
+    .form-grid {
+        grid-template-columns: 1fr; /* Form grid menjadi satu kolom di mobile */
+        gap: 15px;
+    }
+    
+    /* 2. Mengubah Layout Stats Grid menjadi Single Column */
+    .stats-grid {
+        grid-template-columns: 1fr; 
+        gap: 15px; 
+    }
+    
+    /* 3. Menyesuaikan Padding dan Margin untuk Menghemat Ruang */
+    .login-container {
+        padding: 30px 25px; /* Padding login lebih kecil */
+        max-width: 90%;
+    }
+
+    .form-container {
+        padding: 20px; /* Padding form lebih kecil */
+    }
+    
+    /* 4. Memastikan Tata Letak Horizontal Card Tetap Terjaga */
+    .stats-card {
+        padding: 15px; 
+    }
+    
+    /* 5. Font Lebih Kecil untuk Judul Dashboard */
+    .dashboard-title {
+        font-size: 1.6em;
+    }
 }

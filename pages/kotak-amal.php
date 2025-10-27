@@ -15,15 +15,30 @@ $sql = "SELECT ka.*, MAX(dka.ID_Kwitansi_KA) AS is_collected_today
         FROM KotakAmal ka
         LEFT JOIN Dana_KotakAmal dka ON ka.ID_KotakAmal = dka.ID_KotakAmal AND dka.Tgl_Ambil = CURDATE()
         WHERE ka.Status = 'Active'";
+        
+$params = [];
+$types = "";
 
 // FIX: Hanya Pimpinan Pusat yang tidak difilter
 if ($_SESSION['jabatan'] != 'Pimpinan' || $_SESSION['id_lksa'] != 'Pimpinan_Pusat') {
-    $sql .= " AND ka.Id_lksa = '$id_lksa'";
+    // Mengubah string concatenation menjadi parameter binding
+    $sql .= " AND ka.Id_lksa = ?";
+    $params[] = $id_lksa;
+    $types = "s";
 }
 
 $sql .= " GROUP BY ka.ID_KotakAmal";
 
-$result = $conn->query($sql);
+// Eksekusi Kueri
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+
 ?>
 <style>
     /* Style tambahan untuk tombol ikon yang sederhana */
@@ -79,5 +94,6 @@ $result = $conn->query($sql);
 
 <?php
 include '../includes/footer.php';
+$stmt->close();
 $conn->close();
 ?>

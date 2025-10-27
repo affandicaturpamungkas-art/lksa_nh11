@@ -1,26 +1,18 @@
 <?php
 include 'config/database.php';
+// Memastikan helpers tersedia
+include 'config/db_helpers.php';
 
 $id_user = $_SESSION['id_user'];
 $id_lksa = $_SESSION['id_lksa'];
 
 // Query untuk mendapatkan total uang yang diambil
 $sql_uang = "SELECT SUM(JmlUang) AS total FROM Dana_KotakAmal WHERE ID_user = ?";
-$stmt_uang = $conn->prepare($sql_uang);
-$stmt_uang->bind_param("s", $id_user);
-$stmt_uang->execute();
-$result_uang = $stmt_uang->get_result();
-$total_uang_diambil = $result_uang->fetch_assoc()['total'] ?? 0;
-$stmt_uang->close();
+$total_uang_diambil = fetch_single_param_value($conn, $sql_uang, $id_user);
 
-// Query untuk mendapatkan total kotak amal yang dikelola
+// Query untuk mendapatkan total kotak amal yang dikelola (di LKSA)
 $sql_kotak = "SELECT COUNT(*) AS total FROM KotakAmal WHERE ID_LKSA = ?";
-$stmt_kotak = $conn->prepare($sql_kotak);
-$stmt_kotak->bind_param("s", $id_lksa);
-$stmt_kotak->execute();
-$result_kotak = $stmt_kotak->get_result();
-$total_kotak_amal_dikelola = $result_kotak->fetch_assoc()['total'] ?? 0;
-$stmt_kotak->close();
+$total_kotak_amal_dikelola = fetch_single_param_value($conn, $sql_kotak, $id_lksa);
 
 // Ambil jadwal pengambilan untuk hari ini dengan status pengambilan
 $current_day = date('l');
@@ -35,7 +27,7 @@ $hari_indonesia = [
 ];
 $hari_ini = $hari_indonesia[$current_day];
 
-// Kueri SQL yang diperbarui untuk menghindari duplikasi
+// Kueri SQL yang diperbarui untuk menghindari duplikasi - Kueri Jadwal tetap di sini karena butuh 2 parameter dan kompleksitas JOIN/GROUP BY
 $sql_jadwal = "SELECT ka.ID_KotakAmal, ka.Nama_Toko, ka.Alamat_Toko, MAX(dka.ID_Kwitansi_KA) AS is_collected_today
                FROM KotakAmal ka
                LEFT JOIN Dana_KotakAmal dka ON ka.ID_KotakAmal = dka.ID_KotakAmal AND dka.Tgl_Ambil = CURDATE()
@@ -49,8 +41,13 @@ $result_jadwal = $stmt->get_result();
 $stmt->close();
 
 // LOGIC BARU UNTUK SIDEBAR
-$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = '$id_user'";
-$user_info = $conn->query($user_info_sql)->fetch_assoc();
+$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = ?";
+$stmt_user_info = $conn->prepare($user_info_sql);
+$stmt_user_info->bind_param("s", $id_user);
+$stmt_user_info->execute();
+$user_info = $stmt_user_info->get_result()->fetch_assoc();
+$stmt_user_info->close();
+
 $nama_user = $user_info['Nama_User'] ?? 'Pengguna';
 $foto_user = $user_info['Foto'] ?? '';
 $base_url = "http://" . $_SERVER['HTTP_HOST'] . "/lksa_nh/"; // Definisikan $base_url
@@ -116,7 +113,7 @@ include 'includes/header.php'; // <-- LOKASI BARU
                             <span style="color: green; font-weight: bold;">Sudah Diambil</span>
                         <?php } else { ?>
                             <span style="color: orange; font-weight: bold;">Belum Diambil</span>
-                        <?php } ?>
+                        <? } ?>
                     </td>
                     <td>
                         <a href="pages/detail_kotak_amal.php?id=<?php echo htmlspecialchars($row['ID_KotakAmal']); ?>" class="btn btn-primary btn-action-icon" title="Lihat Profil & Lokasi"><i class="fas fa-map-marked-alt"></i></a>

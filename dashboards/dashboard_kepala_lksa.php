@@ -1,23 +1,46 @@
 <?php
 include 'config/database.php';
+// Memastikan helpers tersedia
+include 'config/db_helpers.php';
 
 $id_lksa = $_SESSION['id_lksa'];
 
-$total_user_lksa = $conn->query("SELECT COUNT(*) AS total FROM User WHERE Id_lksa = '$id_lksa'")->fetch_assoc()['total'];
-$total_donatur_lksa = $conn->query("SELECT COUNT(*) AS total FROM Donatur WHERE ID_LKSA = '$id_lksa'")->fetch_assoc()['total'];
-$total_sumbangan_lksa = $conn->query("SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE ID_LKSA = '$id_lksa'")->fetch_assoc()['total'];
-$total_dana_kotak_amal_lksa = $conn->query("SELECT SUM(JmlUang) AS total FROM Dana_KotakAmal WHERE Id_lksa = '$id_lksa'")->fetch_assoc()['total'] ?? 0;
+// --- Menggunakan fungsi helper untuk kueri LKSA ---
+
+// 1. Total User LKSA
+$sql_user = "SELECT COUNT(*) AS total FROM User WHERE Id_lksa = ?";
+$total_user_lksa = fetch_single_param_value($conn, $sql_user, $id_lksa);
+
+// 2. Total Donatur LKSA
+$sql_donatur = "SELECT COUNT(*) AS total FROM Donatur WHERE ID_LKSA = ?";
+$total_donatur_lksa = fetch_single_param_value($conn, $sql_donatur, $id_lksa);
+
+// 3. Total Sumbangan ZIS LKSA
+$sql_sumbangan = "SELECT SUM(Zakat_Profesi + Zakat_Maal + Infaq + Sedekah + Fidyah) AS total FROM Sumbangan WHERE ID_LKSA = ?";
+$total_sumbangan_lksa = fetch_single_param_value($conn, $sql_sumbangan, $id_lksa);
+
+// 4. Total Dana Kotak Amal LKSA
+$sql_dana_ka = "SELECT SUM(JmlUang) AS total FROM Dana_KotakAmal WHERE Id_lksa = ?";
+$total_dana_kotak_amal_lksa = fetch_single_param_value($conn, $sql_dana_ka, $id_lksa);
 
 // LOGIC BARU UNTUK SIDEBAR
 $id_user = $_SESSION['id_user'] ?? '';
-$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = '$id_user'";
-$user_info = $conn->query($user_info_sql)->fetch_assoc();
+$user_info_sql = "SELECT Nama_User, Foto FROM User WHERE Id_user = ?";
+$stmt_user_info = $conn->prepare($user_info_sql);
+$stmt_user_info->bind_param("s", $id_user);
+$stmt_user_info->execute();
+$user_info = $stmt_user_info->get_result()->fetch_assoc();
+$stmt_user_info->close();
+
 $nama_user = $user_info['Nama_User'] ?? 'Pengguna';
 $foto_user = $user_info['Foto'] ?? '';
 $base_url = "http://" . $_SERVER['HTTP_HOST'] . "/lksa_nh/"; // Definisikan $base_url
 $foto_path = $foto_user ? $base_url . 'assets/img/' . $foto_user : $base_url . 'assets/img/yayasan.png'; // Use Yayasan logo as default if none
-$sidebar_total_pegawai = $conn->query("SELECT COUNT(*) AS total FROM User WHERE Id_lksa = '$id_lksa' AND Jabatan IN ('Pegawai', 'Petugas Kotak Amal')")->fetch_assoc()['total'];
-$sidebar_total_donatur_lksa = $conn->query("SELECT COUNT(*) AS total FROM Donatur WHERE ID_LKSA = '$id_lksa'")->fetch_assoc()['total'];
+
+// Total Pegawai dan Petugas KA (Untuk Sidebar)
+$sql_sidebar_pegawai = "SELECT COUNT(*) AS total FROM User WHERE Id_lksa = ? AND Jabatan IN ('Pegawai', 'Petugas Kotak Amal')";
+$sidebar_total_pegawai = fetch_single_param_value($conn, $sql_sidebar_pegawai, $id_lksa);
+$sidebar_total_donatur_lksa = $total_donatur_lksa; // Re-use total donatur dari atas
 
 // Menetapkan variabel $sidebar_stats untuk digunakan di header.php
 $sidebar_stats = '

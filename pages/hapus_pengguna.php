@@ -26,7 +26,8 @@ if ($id_user) {
             
             // Hapus file foto jika ada
             if ($user_row['Foto']) {
-                $file_path = "C:/xampp/htdocs/lksa_nh/assets/img/" . $user_row['Foto'];
+                // --- PERBAIKAN: Mengganti hardcode path dengan path relatif ---
+                $file_path = __DIR__ . "/../assets/img/" . $user_row['Foto'];
                 if (file_exists($file_path)) {
                     unlink($file_path);
                 }

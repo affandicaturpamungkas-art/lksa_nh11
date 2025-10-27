@@ -9,21 +9,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $credential = $_POST['credential'] ?? '';
 
     // Coba login sebagai User (Pimpinan, Kepala LKSA, dll.)
-    $sql_user = "SELECT * FROM User WHERE Nama_User = ? AND Password = ?";
+    // --- PERBAIKAN: HANYA AMBIL DATA USER BERDASARKAN NAMA USER ---
+    $sql_user = "SELECT * FROM User WHERE Nama_User = ?";
     $stmt_user = $conn->prepare($sql_user);
-    $stmt_user->bind_param("ss", $username, $credential);
+    $stmt_user->bind_param("s", $username);
     $stmt_user->execute();
     $result_user = $stmt_user->get_result();
+    $user_login_success = false;
 
     if ($result_user->num_rows > 0) {
         $user = $result_user->fetch_assoc();
-        $_SESSION['loggedin'] = true;
-        $_SESSION['id_user'] = $user['Id_user'];
-        $_SESSION['id_lksa'] = $user['Id_lksa'];
-        $_SESSION['jabatan'] = $user['Jabatan'];
-        header("Location: ../index.php");
-        exit;
+        
+        // --- PERBAIKAN KRITIS: VERIFIKASI PASSWORD MENGGUNAKAN password_verify() ---
+        if (password_verify($credential, $user['Password'])) {
+            $user_login_success = true;
+        } 
+        // KLAUSUL TRANSISIONAL (UNTUK MEMPERTIMBANGKAN PASSWORD LAMA YANG MASIH PLAINTEXT)
+        // KLAUSUL INI PERLU DIHAPUS SETELAH SEMUA USER DI-MIGRASI/RESET PASSWORD!
+        elseif ($credential === $user['Password']) {
+            $user_login_success = true;
+            // Di sini, Anda bisa menambahkan logika untuk me-hash dan mengupdate password di DB
+        }
+        // END KLAUSUL TRANSISIONAL
+        
+        if ($user_login_success) {
+            $_SESSION['loggedin'] = true;
+            $_SESSION['id_user'] = $user['Id_user'];
+            $_SESSION['id_lksa'] = $user['Id_lksa'];
+            $_SESSION['jabatan'] = $user['Jabatan'];
+            // --- PERBAIKAN SESI: Tambahkan Nama User ke Sesi ---
+            $_SESSION['nama_user'] = $user['Nama_User'];
+            
+            $stmt_user->close();
+            header("Location: ../index.php");
+            exit;
+        }
+        $stmt_user->close();
     }
+
 
     // Coba login sebagai Donatur
     $sql_donatur = "SELECT * FROM Donatur WHERE Nama_Donatur = ? AND NO_WA = ?";
@@ -37,9 +60,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['id_donatur'] = $donatur['ID_donatur'];
         $_SESSION['nama_donatur'] = $donatur['Nama_Donatur'];
         $_SESSION['is_donatur'] = true;
+        $stmt_donatur->close();
         header("Location: ../pages/dashboard_donatur.php");
         exit;
     }
+    $stmt_donatur->close();
 
     // Coba login sebagai Pemilik Kotak Amal
     $sql_pemilik = "SELECT ID_KotakAmal, Nama_Pemilik FROM KotakAmal WHERE Nama_Pemilik = ? AND WA_Pemilik = ?";
@@ -53,9 +78,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['id_kotak_amal'] = $pemilik['ID_KotakAmal'];
         $_SESSION['nama_pemilik'] = $pemilik['Nama_Pemilik'];
         $_SESSION['is_pemilik_kotak_amal'] = true;
+        $stmt_pemilik->close();
         header("Location: ../pages/dashboard_pemilik_kotak_amal.php");
         exit;
     }
+    $stmt_pemilik->close();
 
     $error = "Kredensial login salah!";
 }

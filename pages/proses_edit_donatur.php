@@ -4,7 +4,9 @@ include '../config/database.php';
 
 // Fungsi untuk mengunggah foto (MENGGUNAKAN LOGIKA NAMA BARU)
 function handle_upload($file, $nama_donatur) {
-    $target_dir = "C:/xampp/htdocs/lksa_nh/assets/img/";
+    // --- PERBAIKAN: Mengganti hardcode path dengan path relatif yang dinamis ---
+    $target_dir = __DIR__ . '/../assets/img/';
+    
     $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
     $allowed_extensions = array("jpg", "jpeg", "png", "gif");
 
@@ -54,8 +56,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $foto_path = $upload_result['filename'];
 
         // Hapus foto lama jika ada
-        if ($foto_lama && file_exists("C:/xampp/htdocs/lksa_nh/assets/img/" . $foto_lama)) {
-            unlink("C:/xampp/htdocs/lksa_nh/assets/img/" . $foto_lama);
+        // --- PERBAIKAN: Mengganti hardcode path dengan path relatif ---
+        if ($foto_lama) {
+            $file_path_lama = __DIR__ . "/../assets/img/" . $foto_lama;
+            if (file_exists($file_path_lama)) {
+                unlink($file_path_lama);
+            }
         }
     } else {
         // Jika tidak ada foto baru, gunakan foto lama
