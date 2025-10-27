@@ -55,7 +55,7 @@ $result = $stmt->get_result();
 <a href="arsip_kotak_amal.php" class="btn btn-cancel" style="background-color: #F97316; margin-left: 10px;">Lihat Arsip Kotak Amal</a>
 
 
-<table>
+<table class="responsive-table">
     <thead>
         <tr>
             <th>ID Kotak Amal</th>
@@ -69,12 +69,12 @@ $result = $stmt->get_result();
     <tbody>
         <?php while ($row = $result->fetch_assoc()) { ?>
             <tr>
-                <td><?php echo $row['ID_KotakAmal']; ?></td>
-                <td><?php echo $row['Nama_Toko']; ?></td>
-                <td><?php echo $row['Nama_Pemilik']; ?></td>
-                <td><?php echo $row['Alamat_Toko']; ?></td>
-                <td><?php echo $row['Jadwal_Pengambilan']; ?></td>
-                <td>
+                <td data-label="ID Kotak Amal"><?php echo $row['ID_KotakAmal']; ?></td>
+                <td data-label="Nama Toko"><?php echo $row['Nama_Toko']; ?></td>
+                <td data-label="Nama Pemilik"><?php echo $row['Nama_Pemilik']; ?></td>
+                <td data-label="Alamat"><?php echo $row['Alamat_Toko']; ?></td>
+                <td data-label="Jadwal Ambil"><?php echo $row['Jadwal_Pengambilan']; ?></td>
+                <td data-label="Aksi">
                     <a href="detail_kotak_amal.php?id=<?php echo $row['ID_KotakAmal']; ?>" class="btn btn-primary btn-action-icon" title="Lihat Profil & Lokasi"><i class="fas fa-map-marked-alt"></i></a>
                     
                     <a href="edit_kotak_amal.php?id=<?php echo $row['ID_KotakAmal']; ?>" class="btn btn-primary btn-action-icon" title="Edit"><i class="fas fa-edit"></i></a>

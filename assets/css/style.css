@@ -1,4 +1,5 @@
-/* File: affandicaturpamungkas-art/lksa_nh12/lksa_nh12-00e3c0cc8050ed24b06174c0908f14aefbdc8ae9/assets/css/style.css */
+
+/* File: affandicaturpamungkas-art/lksa_nh11/lksa_nh11-2d7b2012996e8f4e740cb48cf84d45fe824a3c71/assets/css/style.css */
 
 body {
     font-family: 'Open Sans', sans-serif; /* Diubah dari 'Lato' */
@@ -327,5 +328,218 @@ th, td {
     /* 5. Font Lebih Kecil untuk Judul Dashboard */
     .dashboard-title {
         font-size: 1.6em;
+    }
+}
+
+/* === RESPONSIVE TABLE STYLES (STACKING VIEW) === */
+@media (max-width: 768px) {
+    /* Mengoverride style tabel standar di header.php */
+    table {
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    .responsive-table thead {
+        display: none; /* Sembunyikan header tabel */
+    }
+
+    .responsive-table tr {
+        display: block; /* Setiap baris menjadi blok (kartu) */
+        margin-bottom: 20px;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .responsive-table td {
+        display: block; /* Setiap sel menjadi blok */
+        text-align: right;
+        padding: 12px 15px;
+        border-bottom: 1px solid #F3F4F6;
+        position: relative;
+    }
+
+    .responsive-table td:last-child {
+        border-bottom: 0;
+        text-align: right; /* Biarkan tombol tetap di kanan */
+    }
+
+    /* Menambahkan label data di kiri setiap sel */
+    .responsive-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        font-weight: 700;
+        width: 50%; /* Batas lebar label */
+        text-align: left;
+        color: var(--primary-color);
+    }
+    
+    .responsive-table td a.btn, 
+    .responsive-table td span {
+        float: none; /* Hilangkan float yang mungkin ada */
+        margin-left: 5px;
+        display: inline-block;
+    }
+    
+    /* Penyesuaian khusus untuk kolom foto */
+    .responsive-table td[data-label="Foto"] {
+        text-align: center; /* Pusatkan foto */
+    }
+    .responsive-table td[data-label="Foto"]::before {
+        content: attr(data-label); /* Ulangi label di atas foto */
+        position: static;
+        display: block;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+}
+/* === END RESPONSIVE TABLE STYLES === */
+
+
+/* === NEW MOBILE NAVIGATION OVERHAUL STYLES (Applies only below 768px) === */
+
+/* 1. OFF-CANVAS MENU (For all links) */
+.off-canvas-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.off-canvas-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    max-width: 80%;
+    height: 100%;
+    background-color: var(--bg-light);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.off-canvas-menu.open {
+    transform: translateX(0);
+}
+
+.off-canvas-overlay.open {
+    visibility: visible;
+    opacity: 1;
+}
+
+.off-canvas-close {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--primary-color);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 10px;
+}
+
+/* Reusing .sidebar-nav-item for Off-Canvas links */
+.off-canvas-menu .sidebar-nav-item {
+    font-size: 1em;
+    padding: 12px 10px;
+    margin-bottom: 5px;
+}
+.off-canvas-menu h2 {
+    text-align: left;
+    margin-bottom: 10px;
+}
+.off-canvas-menu hr {
+    margin: 15px 0;
+}
+
+/* 2. BOTTOM NAVIGATION BAR (Fixed on Mobile) */
+.bottom-nav {
+    display: none; /* Default hidden on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+}
+
+.bottom-nav-item {
+    text-decoration: none;
+    color: #9CA3AF; /* Light gray inactive */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 5px 0;
+    flex: 1;
+    transition: color 0.2s;
+}
+
+.bottom-nav-item i {
+    font-size: 1.4em;
+    margin-bottom: 3px;
+}
+
+.bottom-nav-item.active {
+    color: var(--secondary-color); /* Active color */
+}
+
+/* Mobile Overrides (Main container padding fix) */
+@media (max-width: 768px) {
+    
+    /* Show Hamburger button in the header */
+    .header-mobile-menu-btn {
+        display: block !important;
+    }
+    
+    /* Hide the original sidebar on mobile */
+    .sidebar-wrapper {
+        display: none !important;
+    }
+    
+    /* Adjust content area to account for bottom bar */
+    .container {
+        padding-bottom: 80px; /* Space for the bottom nav */
+    }
+
+    .content {
+        flex-direction: column;
+        padding: 15px; 
+        gap: 15px; 
+    }
+    
+    .main-content-area {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Show bottom nav */
+    .bottom-nav {
+        display: flex;
     }
 }
