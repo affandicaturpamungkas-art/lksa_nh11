@@ -110,7 +110,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin: 0;
             padding: 0;
             background-color: transparent !important;
-            overflow: hidden;
+            overflow: hidden; /* Sembunyikan scrollbar di desktop */
+        }
+        
+        /* FIX: Tambahkan media query untuk mengatasi masalah scroll di mobile */
+        @media (max-width: 600px) {
+            body {
+                overflow-y: auto; /* Izinkan scroll di mobile */
+                height: auto; /* Biarkan tinggi body menyesuaikan konten */
+                padding-top: 50px;
+                padding-bottom: 50px;
+            }
         }
     </style>
 </head>

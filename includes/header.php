@@ -9,107 +9,49 @@ if ($current_dir == 'lksa_nh') {
 
 $dashboard_active = ($current_page == 'index.php' || strpos($current_page, 'dashboard_') !== false) ? 'active' : '';
 $lksa_active = ($current_page == 'lksa.php' || $current_page == 'tambah_lksa.php' || $current_page == 'tambah_pimpinan.php' || $current_page == 'edit_lksa.php') ? 'active' : '';
-$users_active = ($current_page == 'users.php' || $current_page == 'tambah_pengguna.php' || $current_page == 'edit_pengguna.php' || $current_page == 'arsip_users.php') ? 'active' : '';
-$donatur_active = ($current_page == 'donatur.php' || $current_page == 'tambah_donatur.php' || $current_page == 'edit_donatur.php' || $current_page == 'arsip_donatur.php') ? 'active' : '';
+$users_active = ($current_page == 'users.php' || $current_page == 'tambah_pengguna.php' || $current_page == 'edit_pengguna.php') ? 'active' : '';
+$donatur_active = ($current_page == 'donatur.php' || $current_page == 'tambah_donatur.php' || $current_page == 'edit_donatur.php') ? 'active' : '';
 $sumbangan_active = ($current_page == 'sumbangan.php' || $current_page == 'tambah_sumbangan.php' || $current_page == 'detail_sumbangan.php') ? 'active' : '';
 $verifikasi_active = ($current_page == 'verifikasi-donasi.php' || $current_page == 'edit_sumbangan.php' || $current_page == 'wa-blast-form.php') ? 'active' : '';
-$kotak_amal_active = ($current_page == 'kotak-amal.php' || $current_page == 'tambah_kotak_amal.php' || $current_page == 'edit_kotak_amal.php' || $current_page == 'arsip_kotak_amal.php') ? 'active' : '';
+$kotak_amal_active = ($current_page == 'kotak-amal.php' || $current_page == 'tambah_kotak_amal.php' || $current_page == 'edit_kotak_amal.php') ? 'active' : '';
 $dana_kotak_amal_active = ($current_page == 'dana-kotak-amal.php' || $current_page == 'edit_dana_kotak_amal.php') ? 'active' : '';
 $laporan_active = ($current_page == 'laporan.php' || $current_page == 'tambah_laporan.php' || $current_page == 'detail_laporan.php') ? 'active' : ''; // Tambahkan Laporan
+
+// NEW: Tambahkan variabel active untuk halaman menu export
 $export_menu_active = ($current_page == 'export_data_menu.php') ? 'active' : '';
 
-// --- NAVIGATION LINKS DEFINITION (FOR OFF-CANVAS MENU) ---
-$nav_links = [];
-$jabatan = $_SESSION['jabatan'] ?? '';
-$id_lksa = $_SESSION['id_lksa'] ?? '';
-$is_pimpinan_pusat = ($jabatan == 'Pimpinan' && $id_lksa == 'Pimpinan_Pusat');
-
-// GROUP 1: General & Management
-$nav_links['General'][] = ['href' => $base_url . 'index.php', 'icon' => 'fas fa-tachometer-alt', 'text' => 'Dashboard', 'active' => $dashboard_active];
-
-if ($is_pimpinan_pusat) {
-    $nav_links['General'][] = ['href' => $base_url . 'pages/lksa.php', 'icon' => 'fas fa-building', 'text' => 'Manajemen LKSA', 'active' => $lksa_active];
-}
-
-if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA') {
-    $nav_links['General'][] = ['href' => $base_url . 'pages/users.php', 'icon' => 'fas fa-users', 'text' => 'Manajemen Pengguna', 'active' => $users_active];
-}
-
-// GROUP 2: ZIS & Donatur
-if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA' || $jabatan == 'Pegawai') {
-    $nav_links['ZIS'][] = ['href' => $base_url . 'pages/donatur.php', 'icon' => 'fas fa-hand-holding-heart', 'text' => 'Manajemen Donatur ZIS', 'active' => $donatur_active];
-    $nav_links['ZIS'][] = ['href' => $base_url . 'pages/sumbangan.php', 'icon' => 'fas fa-funnel-dollar', 'text' => 'Manajemen Sumbangan', 'active' => $sumbangan_active];
-    if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA') {
-        $nav_links['ZIS'][] = ['href' => $base_url . 'pages/verifikasi-donasi.php', 'icon' => 'fas fa-check-double', 'text' => 'Verifikasi Donasi', 'active' => $verifikasi_active];
-    }
-}
-
-// GROUP 3: Kotak Amal
-if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA' || $jabatan == 'Petugas Kotak Amal') {
-    $nav_links['Kotak Amal'][] = ['href' => $base_url . 'pages/kotak-amal.php', 'icon' => 'fas fa-box', 'text' => 'Manajemen Kotak Amal', 'active' => $kotak_amal_active];
-    $nav_links['Kotak Amal'][] = ['href' => $base_url . 'pages/dana-kotak-amal.php', 'icon' => 'fas fa-coins', 'text' => 'Pengambilan Kotak Amal', 'active' => $dana_kotak_amal_active];
-}
-
-// GROUP 4: Laporan & Export
-if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA') {
-    $nav_links['Lainnya'][] = ['href' => $base_url . 'pages/laporan.php', 'icon' => 'fas fa-inbox', 'text' => 'Laporan Pengguna', 'active' => $laporan_active];
-    $nav_links['Lainnya'][] = ['href' => $base_url . 'pages/export_data_menu.php', 'icon' => 'fas fa-file-export', 'text' => 'Export Data', 'active' => $export_menu_active];
-}
-
-// --- BOTTOM NAV DEFINITION (Max 5 items) ---
-$bottom_nav_items = [];
-$bottom_nav_items[] = ['href' => $base_url . 'index.php', 'icon' => 'fas fa-home', 'text' => 'Home', 'active' => $dashboard_active];
-
-if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA') {
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/verifikasi-donasi.php', 'icon' => 'fas fa-check-double', 'text' => 'Verifikasi', 'active' => $verifikasi_active];
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/users.php', 'icon' => 'fas fa-users', 'text' => 'Pengguna', 'active' => $users_active];
-} elseif ($jabatan == 'Pegawai') {
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/sumbangan.php', 'icon' => 'fas fa-funnel-dollar', 'text' => 'Sumbangan', 'active' => $sumbangan_active];
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/donatur.php', 'icon' => 'fas fa-hand-holding-heart', 'text' => 'Donatur', 'active' => $donatur_active];
-} elseif ($jabatan == 'Petugas Kotak Amal') {
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/kotak-amal.php', 'icon' => 'fas fa-box', 'text' => 'Kotak Amal', 'active' => $kotak_amal_active];
-    $bottom_nav_items[] = ['href' => $base_url . 'pages/dana-kotak-amal.php', 'icon' => 'fas fa-coins', 'text' => 'Pengambilan', 'active' => $dana_kotak_amal_active];
-}
-
-// Add More Menu / Lapor (Always last)
-if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
-    if ($jabatan == 'Pimpinan' || $jabatan == 'Kepala LKSA') {
-         $bottom_nav_items[] = ['href' => '#', 'icon' => 'fas fa-ellipsis-h', 'text' => 'Lainnya', 'active' => ''];
-    } else {
-         $bottom_nav_items[] = ['href' => $base_url . 'pages/tambah_laporan.php', 'icon' => 'fas fa-bullhorn', 'text' => 'Lapor', 'active' => $laporan_active];
-         $bottom_nav_items[] = ['href' => '#', 'icon' => 'fas fa-ellipsis-h', 'text' => 'Lainnya', 'active' => ''];
-    }
-}
-
-
-// --- SIDEBAR LOGIC (Only used for Desktop/Tablet) ---
+// --- SIDEBAR LOGIC ---
 $show_sidebar = false;
 $sidebar_html = '';
 $is_internal_user = false;
 
 if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
 
+    // Check if $conn is defined (it is defined in all page/dashboard files before header.php is included)
     if (isset($conn)) {
         $id_user = $_SESSION['id_user'];
         $user_info_sql = "SELECT Nama_User, Foto, Jabatan FROM User WHERE Id_user = '$id_user'";
-        // Using direct query here as it's for display info only in header
-        $user_info = $conn->query($user_info_sql)->fetch_assoc(); 
+        $user_info = $conn->query($user_info_sql)->fetch_assoc();
         $nama_user = $user_info['Nama_User'] ?? 'Pengguna';
         $foto_user = $user_info['Foto'] ?? '';
         $jabatan = $user_info['Jabatan'] ?? '';
         $is_internal_user = true;
         $foto_path = $foto_user ? $base_url . 'assets/img/' . $foto_user : $base_url . 'assets/img/yayasan.png';
 
-        // $sidebar_stats is assumed to be defined in the main dashboard/page file
+        // $sidebar_stats di-set di setiap file dashboard/manajemen. Dihapus dari tampilan.
         $sidebar_stats = $sidebar_stats ?? '';
 
-        // Tampilkan sidebar HANYA di desktop (di atas 768px)
-        if ($current_page != 'dashboard_donatur.php' && $current_page != 'dashboard_pemilik_kotak_amal.php') {
-             $show_sidebar = true; // Sidebar akan disembunyikan via CSS di mobile
+        // Tampilkan sidebar di semua halaman utama (dashboard dan menu manajemen)
+        // PERBAIKAN: Sertakan 'index.php' secara eksplisit
+        if ($current_page == 'index.php' || $current_dir == 'dashboards' || in_array($current_page, ['lksa.php', 'users.php', 'donatur.php', 'sumbangan.php', 'kotak-amal.php', 'verifikasi-donasi.php', 'dana-kotak-amal.php', 'tambah_pimpinan.php', 'tambah_pengguna.php', 'tambah_donatur.php', 'tambah_kotak_amal.php', 'tambah_sumbangan.php', 'laporan.php', 'tambah_laporan.php', 'edit_pengguna.php', 'edit_donatur.php', 'edit_sumbangan.php', 'edit_kotak_amal.php', 'edit_lksa.php', 'edit_dana_kotak_amal.php', 'detail_sumbangan.php', 'detail_laporan.php', 'export_data_menu.php'])) {
+            // Tambahkan pengecualian agar halaman dashboard_donatur.php dll tidak memakai layout ini
+            if ($current_page != 'dashboard_donatur.php' && $current_page != 'dashboard_pemilik_kotak_amal.php') {
+                $show_sidebar = true;
+            }
         }
 
-
         if ($show_sidebar) {
+            // Use output buffering to capture the sidebar HTML
             ob_start();
             ?>
             <div class="sidebar-wrapper">
@@ -121,37 +63,87 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
 
                 <div class="sidebar-util-btns">
                     <a href="<?php echo $base_url; ?>pages/edit_pengguna.php?id=<?php echo htmlspecialchars($id_user); ?>"
-                        class="btn btn-primary sidebar-small-btn" title="Edit Profil"><i class="fas fa-edit"></i> Profil</a>
+                        class="btn btn-primary sidebar-small-btn" title="Edit Profil"><i class="fas fa-edit"></i></a>
                     <a href="<?php echo $base_url; ?>login/logout.php" class="btn btn-danger sidebar-small-btn" title="Logout"><i class="fas fa-sign-out-alt"></i>
-                        Logout</a>
+                        </a>
                 </div>
 
-                <?php if ($jabatan != 'Pimpinan') { ?>
+                <?php if ($jabatan != 'Pimpinan') { // <-- PERUBAHAN DITAMBAHKAN DI SINI ?>
                 <a href="<?php echo $base_url; ?>pages/tambah_laporan.php" class="btn btn-warning"
                     style="margin-top: 15px; margin-bottom: 15px; background-color: #F97316; color: white; width: 100%; box-sizing: border-box;">
                     <i class="fas fa-bullhorn"></i> Lapor ke Atasan
                 </a>
-                <?php } ?>
+                <?php } // <-- PERUBAHAN DITAMBAHKAN DI SINI ?>
 
                 <hr>
                 
-                <?php echo $sidebar_stats; // Display dynamic stats ?>
-                
                 <h2>Menu Navigasi</h2>
                 
-                <?php foreach ($nav_links as $group_title => $links): ?>
-                    <hr class="nav-divider">
-                    <?php if ($group_title != 'General') { ?>
-                        <h3><?php echo htmlspecialchars($group_title); ?></h3>
+                <div class="sidebar-nav-group">
+                    <a href="<?php echo $base_url; ?>index.php" class="sidebar-nav-item <?php echo $dashboard_active; ?>">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    
+                    <?php if ($_SESSION['jabatan'] == 'Pimpinan' && $_SESSION['id_lksa'] == 'Pimpinan_Pusat') { ?>
+                        <a href="<?php echo $base_url; ?>pages/lksa.php" class="sidebar-nav-item <?php echo $lksa_active; ?>">
+                            <i class="fas fa-building"></i> Manajemen LKSA
+                        </a>
                     <?php } ?>
+                    
+                    <?php if ($_SESSION['jabatan'] == 'Pimpinan' || $_SESSION['jabatan'] == 'Kepala LKSA') { ?>
+                        <a href="<?php echo $base_url; ?>pages/users.php" class="sidebar-nav-item <?php echo $users_active; ?>">
+                            <i class="fas fa-users"></i> Manajemen Pengguna
+                        </a>
+                    <?php } ?>
+                </div>
+
+                <?php if ($_SESSION['jabatan'] == 'Pimpinan' || $_SESSION['jabatan'] == 'Kepala LKSA' || $_SESSION['jabatan'] == 'Pegawai') { ?>
+                    <hr class="nav-divider">
+                    <h3>ZIS & Donatur</h3>
                     <div class="sidebar-nav-group">
-                        <?php foreach ($links as $link): ?>
-                            <a href="<?php echo $link['href']; ?>" class="sidebar-nav-item <?php echo $link['active']; ?>">
-                                <i class="<?php echo $link['icon']; ?>"></i> <?php echo $link['text']; ?>
+                        <a href="<?php echo $base_url; ?>pages/donatur.php" class="sidebar-nav-item <?php echo $donatur_active; ?>">
+                            <i class="fas fa-hand-holding-heart"></i> Manajemen Donatur ZIS
+                        </a>
+                        <a href="<?php echo $base_url; ?>pages/sumbangan.php" class="sidebar-nav-item <?php echo $sumbangan_active; ?>">
+                            <i class="fas fa-funnel-dollar"></i> Manajemen Sumbangan
+                        </a>
+                        <?php if ($_SESSION['jabatan'] == 'Pimpinan' || $_SESSION['jabatan'] == 'Kepala LKSA') { ?>
+                            <a href="<?php echo $base_url; ?>pages/verifikasi-donasi.php" class="sidebar-nav-item <?php echo $verifikasi_active; ?>">
+                                <i class="fas fa-check-double"></i> Verifikasi Donasi
                             </a>
-                        <?php endforeach; ?>
+                        <?php } ?>
                     </div>
-                <?php endforeach; ?>
+                <?php } ?>
+                
+                <?php if ($_SESSION['jabatan'] == 'Pimpinan' || $_SESSION['jabatan'] == 'Kepala LKSA' || $_SESSION['jabatan'] == 'Petugas Kotak Amal') { ?>
+                    <hr class="nav-divider">
+                    <h3>Kotak Amal</h3>
+                    <div class="sidebar-nav-group">
+                        <a href="<?php echo $base_url; ?>pages/kotak-amal.php" class="sidebar-nav-item <?php echo $kotak_amal_active; ?>">
+                            <i class="fas fa-box"></i> Manajemen Kotak Amal
+                        </a>
+                        <a href="<?php echo $base_url; ?>pages/dana-kotak-amal.php" class="sidebar-nav-item <?php echo $dana_kotak_amal_active; ?>">
+                            <i class="fas fa-coins"></i> Pengambilan Kotak Amal
+                        </a>
+                    </div>
+                <?php } ?>
+                
+                <?php if ($_SESSION['jabatan'] == 'Pimpinan' || $_SESSION['jabatan'] == 'Kepala LKSA') { ?>
+                    <hr class="nav-divider">
+                    <h3>Lainnya</h3>
+                    <div class="sidebar-nav-group">
+                        <a href="<?php echo $base_url; ?>pages/laporan.php" class="sidebar-nav-item <?php echo $laporan_active; ?>">
+                            <i class="fas fa-inbox"></i> Laporan Pengguna
+                        </a>
+                        
+                        <a href="<?php echo $base_url; ?>pages/export_data_menu.php" class="sidebar-nav-item <?php echo $export_menu_active; ?>">
+                            <i class="fas fa-file-export"></i> Export Data
+                        </a>
+                        </div>
+                <?php } ?>
+
+                <hr>
+
             </div>
             <?php
             $sidebar_html = ob_get_clean();
@@ -173,16 +165,6 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script>
-        // JavaScript for Off-Canvas Menu Toggle
-        function toggleOffCanvas() {
-            const menu = document.getElementById('offCanvasMenu');
-            const overlay = document.getElementById('offCanvasOverlay');
-            menu.classList.toggle('open');
-            overlay.classList.toggle('open');
-            document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : 'auto';
-        }
-    </script>
     <style>
         :root {
             --primary-color: #1F2937; /* Dark Navy/Slate (Base/Dark) */
@@ -231,19 +213,7 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
             padding-top: 5px;
             border-left: 5px solid var(--secondary-color); /* Tambah aksen border di kiri */
             padding-left: 15px;
-            flex-grow: 1; /* Make logo area flexible */
         }
-        
-        .header-mobile-menu-btn {
-            display: none; /* Default hidden on desktop */
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            font-size: 1.8em;
-            padding: 10px;
-            cursor: pointer;
-        }
-
 
         .header-slogan-top {
             font-size: 0.85em; /* Sedikit diperbesar */
@@ -770,56 +740,77 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
         
         /* Perubahan untuk perangkat mobile (di bawah 768px) */
         @media (max-width: 768px) {
-            
-            /* Sembunyikan sidebar dan panggil gaya dari Bottom Nav/Off-Canvas */
-            .sidebar-wrapper {
-                display: none !important;
-            }
-            
-            .header {
-                padding: 10px 15px;
-            }
-            
-            .header-logo-section {
-                padding-left: 10px;
-            }
-            
-            .header-title-main {
-                font-size: 1.8em;
-            }
-            .header-logo-img {
-                height: 35px;
-            }
-            
-            /* Adjust content area to account for bottom bar */
-            .container {
-                padding-bottom: 80px; /* Space for the bottom nav */
-            }
-
+            /* Konten utama menjadi satu kolom vertikal */
             .content {
                 flex-direction: column;
                 padding: 15px; /* Dikecilkan */
                 gap: 15px; /* Dikecilkan */
             }
+
+            /* Sidebar mengambil lebar penuh di atas */
+            .sidebar-wrapper {
+                width: 100%;
+                padding-right: 0;
+                border-right: none; /* Hapus garis pemisah vertikal */
+                border-bottom: 1px solid var(--border-color); /* Tambah garis bawah */
+                padding-bottom: 15px; /* Dikecilkan */
+                margin-bottom: 15px; /* Dikecilkan */
+            }
             
+            /* Konten utama mengambil lebar penuh di bawah */
             .main-content-area {
                 width: 100%;
                 overflow-x: auto; /* Memastikan tabel bisa di-scroll di mobile */
             }
 
-            /* Show Hamburger button in the header */
-            .header-mobile-menu-btn {
-                display: block !important;
+            /* Tombol-tombol di sidebar dibuat lebih lebar */
+            .sidebar-wrapper .btn {
+                max-width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            /* Tombol utilitas dibuat 50% dari lebar container, tetap berjejer */
+            .sidebar-util-btns {
+                margin-left: 0;
+                margin-right: 0;
+                justify-content: center;
             }
             
-            /* Show bottom nav */
-            .bottom-nav {
-                display: flex;
+            /* Tombol Lapor diatur kembali agar mengambil lebar penuh di mobile */
+            .sidebar-wrapper a.btn-warning {
+                 margin-left: 0 !important;
+                 margin-right: 0 !important;
+            }
+
+            /* Tata letak statistik di sidebar diubah menjadi vertikal penuh */
+            .sidebar-stats-card {
+                display: block; 
+                width: 100%; 
+                margin-top: 8px; /* Dikecilkan */
             }
             
-            /* Footer padding fix */
+            .sidebar-wrapper h2, .sidebar-wrapper h3 {
+                margin-top: 8px; /* Dikecilkan */
+                border-bottom: none;
+                padding-bottom: 0;
+                text-align: center;
+            }
+
+            .sidebar-nav-item {
+                justify-content: center;
+                padding: 10px 0;
+            }
+            .sidebar-nav-item i {
+                margin-right: 8px;
+            }
+            
             .footer-main {
-                padding-bottom: 70px; /* Ensure footer content is above bottom nav */
+                margin-top: 15px;
+            }
+
+            .top-nav {
+                padding: 8px; /* Padding menu navigasi lebih kecil */
             }
         }
         /* END NEW SIDEBAR STYLES */
@@ -827,49 +818,6 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
 </head>
 
 <body>
-    
-    <?php if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) { ?>
-    <div class="off-canvas-overlay" id="offCanvasOverlay" onclick="toggleOffCanvas()"></div>
-    <div class="off-canvas-menu" id="offCanvasMenu">
-        
-        <button class="off-canvas-close" onclick="toggleOffCanvas()"><i class="fas fa-times"></i></button>
-
-        <div style="text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <img src="<?php echo htmlspecialchars($foto_path); ?>" alt="Foto Profil" class="profile-img" style="width: 70px; height: 70px;">
-            <p class="welcome-text-sidebar" style="margin: 5px 0;">
-                <strong><?php echo htmlspecialchars($nama_user); ?></strong><br>
-                (<?php echo htmlspecialchars($jabatan); ?>)
-            </p>
-            <div class="sidebar-util-btns" style="justify-content: center; max-width: 250px; margin: 0 auto;">
-                <a href="<?php echo $base_url; ?>pages/edit_pengguna.php?id=<?php echo htmlspecialchars($_SESSION['id_user']); ?>"
-                    class="btn btn-primary sidebar-small-btn" style="width: 100%; max-width: 120px;" title="Edit Profil"><i class="fas fa-edit"></i> Edit Profil</a>
-                <a href="<?php echo $base_url; ?>login/logout.php" class="btn btn-danger sidebar-small-btn" style="width: 100%; max-width: 120px;" title="Logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
-            <?php if ($jabatan != 'Pimpinan') { ?>
-                <a href="<?php echo $base_url; ?>pages/tambah_laporan.php" class="btn btn-warning"
-                    style="margin-top: 15px; background-color: #F97316; color: white; width: 100%;">
-                    <i class="fas fa-bullhorn"></i> Lapor ke Atasan
-                </a>
-            <?php } ?>
-        </div>
-        
-        <?php foreach ($nav_links as $group_title => $links): ?>
-            <hr class="nav-divider">
-            <?php if ($group_title != 'General') { ?>
-                <h3 style="font-size: 1.1em; color: #1F2937; margin-top: 10px;"><?php echo htmlspecialchars($group_title); ?></h3>
-            <?php } ?>
-            <div class="sidebar-nav-group">
-                <?php foreach ($links as $link): ?>
-                    <a href="<?php echo $link['href']; ?>" class="sidebar-nav-item <?php echo $link['active']; ?>" onclick="toggleOffCanvas()">
-                        <i class="<?php echo $link['icon']; ?>"></i> <?php echo $link['text']; ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
-        
-    </div>
-    <?php } ?>
-    
     <div class="container">
         <div class="header">
             <div class="header-logo-section">
@@ -881,41 +829,11 @@ if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) {
                 
                 <span class="header-slogan-bottom">mendonasikan, mengapresiasi, dan menjaga keberlanjutan kebaikan</span>
             </div>
-             <?php if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) { ?>
-                <button class="header-mobile-menu-btn" onclick="toggleOffCanvas()">
-                    <i class="fas fa-bars"></i>
-                </button>
-            <?php } ?>
         </div>
-        
         <?php if ($show_sidebar) { ?>
             <div class="content">
                 <?php echo $sidebar_html; ?>
                 <div class="main-content-area">
-        <?php } else { ?>
-            <div class="content" style="flex-direction: column;">
-        <?php } ?>
-
-<?php if (isset($_SESSION['loggedin']) && isset($_SESSION['id_user'])) { ?>
-    <div class="bottom-nav">
-        <?php 
-        // Display only the first 4 items (or 5 if available)
-        $limit = count($bottom_nav_items) > 5 ? 5 : count($bottom_nav_items);
-        for ($i = 0; $i < $limit; $i++): 
-            $item = $bottom_nav_items[$i];
-            
-            // If it's the 'Lainnya' button, use onClick to trigger Off-Canvas
-            if ($item['text'] == 'Lainnya') { ?>
-                <a href="javascript:void(0)" class="bottom-nav-item" onclick="toggleOffCanvas()">
-                    <i class="fas fa-ellipsis-h"></i>
-                    <span>Lainnya</span>
-                </a>
-            <?php } else { ?>
-                <a href="<?php echo $item['href']; ?>" class="bottom-nav-item <?php echo $item['active']; ?>">
-                    <i class="<?php echo $item['icon']; ?>"></i>
-                    <span><?php echo $item['text']; ?></span>
-                </a>
-            <?php }
-        endfor; ?>
-    </div>
-<?php } ?>
+                <?php } else { ?>
+                    <div class="content">
+                    <?php } ?>

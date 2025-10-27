@@ -1,4 +1,3 @@
-
 /* File: affandicaturpamungkas-art/lksa_nh11/lksa_nh11-2d7b2012996e8f4e740cb48cf84d45fe824a3c71/assets/css/style.css */
 
 body {
@@ -42,18 +41,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .login-container {
     background-color: rgba(255, 255, 255, 0.9); 
-    padding: 35px 45px; 
+    padding: 150px 100px; /* Padding Vertikal (Tinggi) Ditingkatkan */
     border-radius: 15px; 
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Bayangan lebih halus */
     width: 100%;
-    max-width: 420px; 
+    max-width: 850px; /* Lebar Ditingkatkan */
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.login-container:hover {
-    transform: translateY(-5px); /* Hover lebih menonjol */
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+@media (min-width: 601px) {
+    .login-container:hover {
+        transform: translateY(-5px); /* Hover lebih menonjol */
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
 }
 
 .system-title {
@@ -88,11 +89,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-group input {
     width: 100%;
-    padding: 14px 15px;
+    padding: 28px 30px; /* Ukuran input disesuaikan untuk kesan sangat besar */
     border: 1px solid #dcdcdc; 
     border-radius: 10px; /* Lebih membulat */
     box-sizing: border-box;
-    font-size: 1em;
+    font-size: 1.2em; /* Ditingkatkan */
     transition: border-color 0.3s, box-shadow 0.3s;
     background-color: #ffffff; 
 }
@@ -105,12 +106,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-login {
     width: 100%;
-    padding: 15px; /* Lebih tebal */
+    padding: 32px; /* Ukuran tombol disesuaikan untuk kesan sangat besar */
     background-color: #06B6D4; /* Cyan/Aqua */
     color: #fff;
     border: none;
     border-radius: 10px; /* Lebih membulat */
-    font-size: 1.0em;
+    font-size: 1.5em; /* Ditingkatkan */
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
@@ -312,8 +313,19 @@ th, td {
     
     /* 3. Menyesuaikan Padding dan Margin untuk Menghemat Ruang */
     .login-container {
-        padding: 30px 25px; /* Padding login lebih kecil */
-        max-width: 90%;
+        padding: 100px 25px; /* Padding vertikal ditingkatkan untuk dominasi tinggi di mobile */
+        max-width: 90%; 
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08); 
+        transform: none; 
+    }
+    
+    .form-group input {
+        padding: 20px 20px; /* Input lebih besar di mobile */
+    }
+    
+    .btn-login {
+        padding: 25px; /* Tombol lebih besar di mobile */
+        font-size: 1.3em;
     }
 
     .form-container {
